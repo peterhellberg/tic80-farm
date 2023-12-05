@@ -109,6 +109,10 @@ const Bot = struct {
             tic.rectb(b.mouse.x * 8, b.mouse.y * 8, 8, 8, 15);
         }
 
+        if (tic.pressed(4)) {
+            tic.rectb(b.x * 8, b.y * 8, 8, 8, 15);
+        }
+
         spr(15, b.x, b.y - 1, .{ .transparent = &[_]u8{0} });
     }
 };
