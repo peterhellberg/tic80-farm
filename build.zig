@@ -27,7 +27,7 @@ pub fn build(b: *std.Build) !void {
     exe.import_memory = true;
 
     // Export symbols for use by TIC
-    exe.export_symbol_names = &[_][]const u8{"TIC"};
+    exe.export_symbol_names = &[_][]const u8{ "BOOT", "TIC" };
 
     // Run command that requires you to have a TIC-80 Pro binary
     const run_cmd = b.addSystemCommand(&[_][]const u8{
