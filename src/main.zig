@@ -21,6 +21,7 @@ const Farm = struct {
         self.bot.update();
 
         if (tic.pressed(4) or self.bot.act()) self.action();
+        if (tic.pressed(5) or self.bot.sec()) self.secondary();
 
         for (&self.plots) |*p| p.update();
     }
@@ -32,16 +33,45 @@ const Farm = struct {
         self.bot.draw();
     }
 
+    fn secondary(self: *Farm) void {
+        const p = self.plot();
+        const id = tic.mget(p.x, p.y);
+
+        if (tic.fget(id, 2)) return self.sell();
+    }
+
     fn action(self: *Farm) void {
         const p = self.plot();
+        const id = tic.mget(p.x, p.y);
 
-        switch (tic.mget(p.x, p.y)) {
+        if (tic.fget(id, 2)) return self.buy();
+        if (tic.fget(id, 7)) return self.fill();
+
+        switch (id) {
             0, 1 => self.till(p),
             2 => self.plant(p),
             3 => self.water(p),
             7, 8, 9 => self.pick(p),
             else => {},
         }
+    }
+
+    fn buy(self: *Farm) void {
+        if (self.inventory.gold > 0) {
+            self.inventory.gold -|= 1;
+            self.inventory.seeds += 2;
+        }
+    }
+
+    fn sell(self: *Farm) void {
+        if (self.inventory.carrots > 0) {
+            self.inventory.carrots -|= 1;
+            self.inventory.gold += 2;
+        }
+    }
+
+    fn fill(self: *Farm) void {
+        self.inventory.water +|= 1;
     }
 
     fn till(self: *Farm, p: *Plot) void {
@@ -52,14 +82,18 @@ const Farm = struct {
         if (self.inventory.seeds > 0) {
             p.state(.planted);
             self.inventory.seeds -|= 1;
-        } else if (self.inventory.carrots > 0) {
+        } else if (self.inventory.carrots > 0 and self.inventory.water > 0) {
             p.state(.growing);
             self.inventory.carrots -|= 1;
+            self.inventory.water -|= 1;
         }
     }
 
-    fn water(_: *Farm, p: *Plot) void {
-        p.state(.watered);
+    fn water(self: *Farm, p: *Plot) void {
+        if (self.inventory.water > 1) {
+            self.inventory.water -|= 2;
+            p.state(.watered);
+        }
     }
 
     fn pick(self: *Farm, p: *Plot) void {
@@ -116,12 +150,16 @@ const Bot = struct {
         return (b.x == b.mouse.x and b.y == b.mouse.y) and b.mouse.rightReleased();
     }
 
+    fn sec(b: *Bot) bool {
+        return (b.x == b.mouse.x and b.y == b.mouse.y) and b.mouse.middleReleased();
+    }
+
     fn draw(b: *Bot) void {
         if (b.mouse.leftHeld() or b.mouse.rightHeld()) {
             tic.rectb(b.mouse.x * 8, b.mouse.y * 8, 8, 8, 15);
         }
 
-        if (tic.pressed(4)) {
+        if (tic.pressed(4) or tic.pressed(5)) {
             tic.rectb(b.x * 8, b.y * 8, 8, 8, 15);
         }
 
@@ -130,14 +168,22 @@ const Bot = struct {
 };
 
 const Inventory = struct {
-    seeds: u16 = 3,
+    gold: u16 = 2,
+    seeds: u16 = 0,
     carrots: u16 = 0,
+    water: u5 = 0,
 
     fn draw(self: *Inventory) void {
-        spr(19, 22, 0, .{});
-        printf(" {d}", .{self.seeds}, 23, 0, .{ .small_font = true, .color = 2 });
-        spr(18, 26, 0, .{});
-        printf(" {d}", .{self.carrots}, 27, 0, .{ .small_font = true, .color = 2 });
+        const args: tic.PrintArgs = .{ .small_font = true, .color = 12 };
+
+        spr(21, 18, 0, .{});
+        printf("{d}", .{self.water}, 19, 0, args);
+        spr(20, 21, 0, .{});
+        printf("{d}", .{self.gold}, 22, 0, args);
+        spr(19, 24, 0, .{});
+        printf("{d}", .{self.seeds}, 25, 0, args);
+        spr(18, 27, 0, .{});
+        printf("{d}", .{self.carrots}, 28, 0, args);
     }
 };
 
@@ -239,6 +285,14 @@ const Mouse = struct {
 
     fn rightReleased(self: *Mouse) bool {
         return !self.data.right and self.prev.right;
+    }
+
+    fn middleHeld(self: *Mouse) bool {
+        return self.data.middle and self.prev.middle;
+    }
+
+    fn middleReleased(self: *Mouse) bool {
+        return !self.data.middle and self.prev.middle;
     }
 };
 
