@@ -9,7 +9,10 @@ const Farm = struct {
     fn start(self: *Farm) void {
         for (1..17) |y| {
             for (0..30) |x| {
-                self.plots[offset(x, y)] = Plot.new(@intCast(x), @intCast(y));
+                self.plots[offset(x, y)] = Plot.new(
+                    @intCast(x),
+                    @intCast(y),
+                );
             }
         }
     }
@@ -19,9 +22,7 @@ const Farm = struct {
 
         if (tic.pressed(4) or self.bot.act()) self.action();
 
-        for (&self.plots) |*p| {
-            p.update();
-        }
+        for (&self.plots) |*p| p.update();
     }
 
     fn draw(self: *Farm) void {
