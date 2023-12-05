@@ -27,7 +27,7 @@ bundle: all
 	@mkdir -p bundle
 	@tic80-pro --cli --fs . --cmd 'load cart.wasmp & import binary zig-out/bin/cart.wasm & save & export html bundle/farm alone=1 & export linux bundle/farm.elf alone=1 & export win bundle/farm.exe & exit'
 	@unzip -d bundle/web bundle/farm.zip
-	@zip -juq bundle/${ARCHIVE} bundle/web bundle/${NAME}.elf bundle/${NAME}.exe
+	@zip -rjuq bundle/${ARCHIVE} bundle/web bundle/${NAME}.elf bundle/${NAME}.exe
 	@echo "✔ Updated bundle/${ARCHIVE}"
 
 .PHONY: backup
