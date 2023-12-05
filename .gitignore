@@ -4,4 +4,4 @@ zig-out
 cart.wasm
 *.elf
 *.zip
-web
+bundle
