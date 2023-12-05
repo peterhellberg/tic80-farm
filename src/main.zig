@@ -43,8 +43,8 @@ const Farm = struct {
         }
     }
 
-    fn till(_: *Farm, p: *Plot) void {
-        p.state(.tilled);
+    fn till(self: *Farm, p: *Plot) void {
+        if (self.inventory.seeds > 0 or self.inventory.carrots > 0) p.state(.tilled);
     }
 
     fn plant(self: *Farm, p: *Plot) void {
@@ -87,7 +87,7 @@ const Bot = struct {
     fn update(b: *Bot) void {
         b.mouse.update();
 
-        if (b.mouse.leftHeld()) {
+        if (b.mouse.leftHeld() or b.mouse.rightHeld()) {
             if (b.mouse.x > b.x) b.x +|= 1;
             if (b.mouse.x < b.x) b.x -|= 1;
             if (b.mouse.y > b.y) b.y +|= 1;
@@ -105,11 +105,11 @@ const Bot = struct {
     }
 
     fn draw(b: *Bot) void {
-        if (b.mouse.leftHeld()) {
+        if (b.mouse.leftHeld() or b.mouse.rightHeld()) {
             tic.rectb(b.mouse.x * 8, b.mouse.y * 8, 8, 8, 15);
         }
 
-        spr(15, b.x, b.y, .{ .transparent = &[_]u8{0} });
+        spr(15, b.x, b.y - 1, .{ .transparent = &[_]u8{0} });
     }
 };
 
@@ -198,15 +198,15 @@ const Mouse = struct {
         self.prev = self.data;
         tic.mouse(&self.data);
 
-        if (self.data.x >= 0 and self.data.x <= tic.WIDTH)
+        if (self.data.x >= 0 and self.data.x <= tic.WIDTH) {
             self.x = @intCast(@divFloor(self.data.x, 8));
+            if (self.x > 29) self.x = 29;
+        }
 
-        if (self.data.y >= 0 and self.data.y <= tic.HEIGHT)
+        if (self.data.y >= 0 and self.data.y <= tic.HEIGHT) {
             self.y = @intCast(@divFloor(self.data.y, 8));
-    }
-
-    fn leftPressed(self: *Mouse) bool {
-        return self.data.left and !self.prev.left;
+            if (self.y == 0) self.y = 1;
+        }
     }
 
     fn leftHeld(self: *Mouse) bool {
