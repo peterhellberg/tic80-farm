@@ -1,6 +1,26 @@
 const std = @import("std");
 const tic = @import("tic");
 
+const Inventory = struct {
+    gold: u16 = 2,
+    seeds: u16 = 2,
+    carrots: u16 = 0,
+    water: u5 = 2,
+
+    fn draw(self: *Inventory) void {
+        const args: tic.PrintArgs = .{ .small_font = true, .color = 12 };
+
+        spr(21, 18, 0, .{});
+        printf("{d}", .{self.water}, 19, 0, args);
+        spr(20, 21, 0, .{});
+        printf("{d}", .{self.gold}, 22, 0, args);
+        spr(19, 24, 0, .{});
+        printf("{d}", .{self.seeds}, 25, 0, args);
+        spr(18, 27, 0, .{});
+        printf("{d}", .{self.carrots}, 28, 0, args);
+    }
+};
+
 const Farm = struct {
     bot: Bot = .{},
     inventory: Inventory = .{},
@@ -92,6 +112,8 @@ const Farm = struct {
 
     fn buy(self: *Farm) void {
         if (self.inventory.gold > 0) {
+            tic.nosfx();
+            // TODO: sfx
             self.inventory.gold -|= 1;
             self.inventory.seeds += 2;
         }
@@ -99,24 +121,39 @@ const Farm = struct {
 
     fn sell(self: *Farm) void {
         if (self.inventory.carrots > 0) {
+            tic.nosfx();
+            // TODO: sfx
             self.inventory.carrots -|= 1;
             self.inventory.gold += 2;
         }
     }
 
     fn fill(self: *Farm) void {
+        if (self.inventory.water < 31) {
+            tic.nosfx();
+            tic.sfx(1, .{ .note = 1, .octave = 5, .duration = 39, .speed = 4, .volume = 6 });
+        }
+
         self.inventory.water +|= 1;
     }
 
     fn till(self: *Farm, p: *Plot) void {
-        if (self.inventory.seeds > 0 or self.inventory.carrots > 0) p.state(.tilled);
+        if (self.inventory.seeds > 0 or self.inventory.carrots > 0) {
+            tic.nosfx();
+            tic.note("B-7", .{ .sfx = 63, .duration = 15, .speed = 4, .volume = 3 });
+            p.state(.tilled);
+        }
     }
 
     fn plant(self: *Farm, p: *Plot) void {
         if (self.inventory.seeds > 0) {
+            tic.nosfx();
+            tic.note("D-4", .{ .sfx = 62, .duration = 15, .speed = 4, .volume = 3 });
             p.state(.planted);
             self.inventory.seeds -|= 1;
         } else if (self.inventory.carrots > 0 and self.inventory.water > 0) {
+            tic.nosfx();
+            tic.note("D-4", .{ .sfx = 62, .duration = 15, .speed = 4, .volume = 3 });
             p.state(.growing);
             self.inventory.carrots -|= 1;
             self.inventory.water -|= 1;
@@ -125,6 +162,7 @@ const Farm = struct {
 
     fn water(self: *Farm, p: *Plot) void {
         if (self.inventory.water > 1) {
+            tic.note("C#8", .{ .sfx = 63, .duration = 15, .speed = 1, .volume = 3 });
             self.inventory.water -|= 2;
             p.state(.watered);
         }
@@ -177,6 +215,8 @@ const Bot = struct {
         if (tic.fget(tic.mget(b.x, b.y), 0)) {
             b.x = lx;
             b.y = ly;
+        } else if (b.x != lx or b.y != ly) {
+            tic.note("A-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
         }
     }
 
@@ -198,26 +238,6 @@ const Bot = struct {
         }
 
         spr(15, b.x, b.y - 1, .{ .transparent = &[_]u8{0} });
-    }
-};
-
-const Inventory = struct {
-    gold: u16 = 2,
-    seeds: u16 = 0,
-    carrots: u16 = 0,
-    water: u5 = 0,
-
-    fn draw(self: *Inventory) void {
-        const args: tic.PrintArgs = .{ .small_font = true, .color = 12 };
-
-        spr(21, 18, 0, .{});
-        printf("{d}", .{self.water}, 19, 0, args);
-        spr(20, 21, 0, .{});
-        printf("{d}", .{self.gold}, 22, 0, args);
-        spr(19, 24, 0, .{});
-        printf("{d}", .{self.seeds}, 25, 0, args);
-        spr(18, 27, 0, .{});
-        printf("{d}", .{self.carrots}, 28, 0, args);
     }
 };
 
@@ -346,7 +366,18 @@ export fn BOOT() void {
     farm.start();
 }
 
+var t: u32 = 0;
+
 export fn TIC() void {
+    t += 1;
+
+    // Good sfx
+    // if (t % 60 == 0) tic.sfx(1, .{ .note = 1, .octave = 5, .duration = 40, .speed = 4 });
+    // if (tic.pressed(7)) tic.note("B-7", .{ .sfx = 63, .duration = 15, .speed = 4 }); // dig sound maybe
+    // tic.note("A-7", .{ .sfx = 62, .duration = 5, .speed = 4, .volume = 1 }); // movement sound maybe
+
+    if (tic.pressed(6)) tic.note("A-7", .{ .sfx = 62, .duration = 5, .speed = 4, .volume = 1 });
+
     farm.update();
     farm.draw();
 }
