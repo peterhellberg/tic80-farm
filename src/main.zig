@@ -31,6 +31,40 @@ const Farm = struct {
         tic.map(.{});
         self.inventory.draw();
         self.bot.draw();
+        self.info();
+    }
+
+    fn info(self: *Farm) void {
+        const p = self.plot();
+        const id = tic.mget(p.x, p.y);
+
+        const can_buy = self.inventory.gold > 0 and tic.fget(id, 2);
+        const can_fill = self.inventory.water < 31 and tic.fget(id, 7);
+
+        if (can_buy or can_fill) {
+            const x = self.bot.x * 8;
+            const y = self.bot.y * 8;
+
+            var w: i32 = 42;
+            if (can_fill) w = 44;
+
+            tic.rect(x + 1, y + 4, w, 10, 5);
+            tic.rectb(x + 2, y + 5, w, 10, 3);
+            tic.rectb(x + 1, y + 4, w, 10, 4);
+
+            tic.tri(
+                @floatFromInt(x + 5),
+                @floatFromInt(y),
+                @floatFromInt(x + 5),
+                @floatFromInt(y + 4),
+                @floatFromInt(x + 10),
+                @floatFromInt(y + 4),
+                4,
+            );
+
+            if (can_buy) _ = tic.print("Buy seeds?", @intCast(x + 4), @intCast(y + 7), .{ .small_font = true, .color = 14 });
+            if (can_fill) _ = tic.print("Fill water?", @intCast(x + 4), @intCast(y + 7), .{ .small_font = true, .color = 7 });
+        }
     }
 
     fn secondary(self: *Farm) void {
