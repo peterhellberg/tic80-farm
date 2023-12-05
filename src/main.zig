@@ -87,6 +87,12 @@ const Bot = struct {
 
     fn update(b: *Bot) void {
         b.mouse.update();
+        b.move();
+    }
+
+    fn move(b: *Bot) void {
+        const lx = b.x;
+        const ly = b.y;
 
         if (b.mouse.leftHeld() or b.mouse.rightHeld()) {
             if (b.mouse.x > b.x) b.x +|= 1;
@@ -99,6 +105,11 @@ const Bot = struct {
         if (tic.pressed(1) and b.y < 16) b.y +|= 1;
         if (tic.pressed(2)) b.x -|= 1;
         if (tic.pressed(3) and b.x < 29) b.x +|= 1;
+
+        if (tic.fget(tic.mget(b.x, b.y), 0)) {
+            b.x = lx;
+            b.y = ly;
+        }
     }
 
     fn act(b: *Bot) bool {
