@@ -1,6 +1,9 @@
 const std = @import("std");
 const tic = @import("tic");
 
+var prng = std.rand.DefaultPrng.init(0);
+const random = prng.random();
+
 const Inventory = struct {
     gold: u16 = 2,
     seeds: u16 = 2,
@@ -44,6 +47,25 @@ const Farm = struct {
         if (tic.pressed(5) or self.bot.sec()) self.secondary();
 
         for (&self.plots) |*p| p.update();
+
+        self.grass(random.int(u32));
+    }
+
+    fn grass(_: *Farm, r: u32) void {
+        if (t % 24 == 0) {
+            for (1..17) |Y| {
+                const y: i32 = @intCast(Y);
+
+                for (0..30) |X| {
+                    const x: i32 = @intCast(X);
+                    const id = tic.mget(x, y);
+
+                    if (id == 1) tic.mset(x, y, 16);
+                    if (id == 16) tic.mset(x, y, if (r % 2 == 0) 17 else 1);
+                    if (id == 17) tic.mset(x, y, if (r % 3 == 0) 16 else 1);
+                }
+            }
+        }
     }
 
     fn draw(self: *Farm) void {
@@ -238,10 +260,14 @@ const Bot = struct {
     fn draw(b: *Bot) void {
         if (b.mouse.leftHeld() or b.mouse.rightHeld()) {
             tic.rectb(b.mouse.x * 8, b.mouse.y * 8, 8, 8, 15);
-        }
-
-        if (tic.pressed(4) or tic.pressed(5)) {
+        } else if (tic.pressed(4) or tic.pressed(5)) {
             tic.rectb(b.x * 8, b.y * 8, 8, 8, 15);
+        } else {
+            if (t % 5 == 0) {
+                tic.pix(b.x * 8 + 3, b.y * 8 + 1, 14);
+            } else {
+                tic.pix(b.x * 8 + 3, b.y * 8, 15);
+            }
         }
 
         spr(15, b.x, b.y - 1, .{ .transparent = &[_]u8{0} });
