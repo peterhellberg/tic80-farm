@@ -124,7 +124,7 @@ const Farm = struct {
         if (tic.fget(id, 7)) return self.fill();
 
         switch (id) {
-            0, 1 => self.till(p),
+            0, 1, 16, 17 => self.till(p),
             2 => self.plant(p),
             3 => self.water(p),
             7, 8, 9 => self.pick(p),
@@ -136,6 +136,7 @@ const Farm = struct {
         if (self.inventory.gold > 0) {
             tic.nosfx();
             // TODO: sfx
+            tic.sfx(1, .{ .note = 1, .octave = 5, .duration = 39, .speed = 4, .volume = 6 });
             self.inventory.gold -|= 1;
             self.inventory.seeds += 2;
         }
@@ -145,6 +146,7 @@ const Farm = struct {
         if (self.inventory.carrots > 0) {
             tic.nosfx();
             // TODO: sfx
+            tic.sfx(1, .{ .note = 1, .octave = 5, .duration = 39, .speed = 4, .volume = 6 });
             self.inventory.carrots -|= 1;
             self.inventory.gold += 2;
         }
@@ -179,6 +181,8 @@ const Farm = struct {
             p.state(.growing);
             self.inventory.carrots -|= 1;
             self.inventory.water -|= 1;
+        } else {
+            tic.note("C-2", .{ .sfx = 62, .duration = 8, .speed = 4, .volume = 3 });
         }
     }
 
