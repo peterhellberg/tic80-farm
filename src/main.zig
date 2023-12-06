@@ -38,6 +38,8 @@ const Farm = struct {
                 );
             }
         }
+
+        // tic.music(0, .{ .loop = false });
     }
 
     fn update(self: *Farm) void {
@@ -246,9 +248,9 @@ const Bot = struct {
             b.y = ly;
         } else if (b.x != lx or b.y != ly) {
             if ((b.x ^ b.y) % 2 != 0) {
-                tic.note("A-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
+                tic.note("A-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1 });
             } else {
-                tic.note("B-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
+                tic.note("B-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1 });
             }
         }
     }
