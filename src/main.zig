@@ -4,7 +4,7 @@ const tic = @import("tic");
 const Inventory = struct {
     gold: u16 = 2,
     seeds: u16 = 2,
-    carrots: u16 = 0,
+    carrots: u16 = 2,
     water: u5 = 2,
 
     fn draw(self: *Inventory) void {
@@ -175,6 +175,9 @@ const Farm = struct {
             else => {},
         }
 
+        tic.nosfx();
+        tic.note("A-6", .{ .sfx = 58, .duration = 15, .speed = 4, .volume = 4 });
+
         p.state(.empty);
     }
 
@@ -216,7 +219,11 @@ const Bot = struct {
             b.x = lx;
             b.y = ly;
         } else if (b.x != lx or b.y != ly) {
-            tic.note("A-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
+            if ((b.x ^ b.y) % 2 != 0) {
+                tic.note("A-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
+            } else {
+                tic.note("B-3", .{ .sfx = 61, .duration = 6, .speed = 4, .volume = 1, .channel = 2 });
+            }
         }
     }
 
@@ -373,10 +380,11 @@ export fn TIC() void {
 
     // Good sfx
     // if (t % 60 == 0) tic.sfx(1, .{ .note = 1, .octave = 5, .duration = 40, .speed = 4 });
-    // if (tic.pressed(7)) tic.note("B-7", .{ .sfx = 63, .duration = 15, .speed = 4 }); // dig sound maybe
-    // tic.note("A-7", .{ .sfx = 62, .duration = 5, .speed = 4, .volume = 1 }); // movement sound maybe
-
-    if (tic.pressed(6)) tic.note("A-7", .{ .sfx = 62, .duration = 5, .speed = 4, .volume = 1 });
+    // if (tic.pressed(7)) tic.note("B-7", .{ .sfx = 63, .duration = 15, .speed = 4 }); // dig sound?
+    // tic.note("A-7", .{ .sfx = 62, .duration = 5, .speed = 4, .volume = 1 }); // movement sound?
+    // tic.note("A-6", .{ .sfx = 58, .duration = 15, .speed = 4, .volume = 4 }); // pick sound?
+    //
+    if (tic.pressed(6)) tic.note("A-6", .{ .sfx = 58, .duration = 15, .speed = 4, .volume = 4 });
 
     farm.update();
     farm.draw();
