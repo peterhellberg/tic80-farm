@@ -161,9 +161,9 @@ const Farm = struct {
     }
 
     fn water(self: *Farm, p: *Plot) void {
-        if (self.inventory.water > 1) {
+        if (self.inventory.water > 0) {
             tic.note("C#8", .{ .sfx = 63, .duration = 15, .speed = 1, .volume = 3 });
-            self.inventory.water -|= 2;
+            self.inventory.water -|= 1;
             p.state(.watered);
         }
     }
