@@ -1,7 +1,7 @@
 const std = @import("std");
 const tic = @import("tic");
 
-var prng = std.rand.DefaultPrng.init(0);
+var prng = std.Random.DefaultPrng.init(0);
 const random = prng.random();
 
 const Inventory = struct {
@@ -393,7 +393,7 @@ fn printf(comptime fmt: []const u8, fmtargs: anytype, x: i32, y: i32, args: tic.
     _ = tic.printf(fmt, fmtargs, x * 8, y * 8, args);
 }
 
-fn spr(id: i32, x: i32, y: i32, args: anytype) void {
+fn spr(id: i32, x: i32, y: i32, args: tic.SpriteArgs) void {
     tic.spr(id, x * 8, y * 8, args);
 }
 
