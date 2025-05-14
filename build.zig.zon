@@ -1,11 +1,12 @@
 .{
-    .name = "tic80-farm",
+    .name = .tic80_farm,
     .version = "0.0.0",
+    .fingerprint = 0xee6b66e8bf373450,
     .paths = .{""},
     .dependencies = .{
         .tic = .{
-            .url = "https://github.com/peterhellberg/tic/archive/refs/tags/v0.0.4.tar.gz",
-            .hash = "122030447948a5fa995b84a80de9989f80f796fa80c8bd0a29ada046f4fa011973c4",
+            .url = "https://github.com/peterhellberg/tic/archive/refs/tags/v0.0.7.tar.gz",
+            .hash = "tic-0.0.7-AAAAAL47AAAeMbJnCa-rIZdwg4276zhL85xYn1qBZYNA",
         },
     },
 }
